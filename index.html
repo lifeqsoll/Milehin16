@@ -297,9 +297,29 @@
       gap: 12px;
       align-items: center;
       color: var(--text);
+      transform: translateY(0);
+      opacity: 1;
+      transition: padding .28s ease, opacity .25s ease, transform .25s ease;
+    }
+    .overlay-head.is-collapsed {
+      padding-top: 8px;
+      padding-bottom: 8px;
     }
     .overlay-head h3 { margin: 0; font-size: 1.2rem; color: var(--accent); }
-    .overlay-head p { margin: 4px 0 0; color: var(--muted); line-height: 1.45; }
+    .overlay-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      line-height: 1.45;
+      max-height: 220px;
+      opacity: 1;
+      overflow: hidden;
+      transition: max-height .28s ease, opacity .22s ease, margin .22s ease;
+    }
+    .overlay-head.is-collapsed p {
+      max-height: 0;
+      opacity: 0;
+      margin-top: 0;
+    }
 
     .overlay-nav button {
       border: 1px solid #c7ad99;
@@ -401,7 +421,9 @@
         gap: 20px;
         padding: 16px;
         overflow-y: auto;
-        max-height: calc(100vh - 180px);
+        max-height: none;
+        min-height: 0;
+        flex: 1 1 auto;
       }
       .hall-overlay .overlay-card {
         display: flex !important;
@@ -697,6 +719,7 @@
     const hallMenuBackdrop = document.getElementById("hallMenuBackdrop");
     const timelineGrid = document.getElementById("timelineGrid");
     const hallOverlay = document.getElementById("hallOverlay");
+    const overlayHead = document.querySelector(".overlay-head");
     const overlayTitle = document.getElementById("overlayTitle");
     const overlayLead = document.getElementById("overlayLead");
     const overlayGrid = document.getElementById("overlayGrid");
@@ -706,6 +729,13 @@
     const nextHallBtn = document.getElementById("nextHallBtn");
     const toMainBtn = document.getElementById("toMainBtn");
     let activeHallIndex = 0;
+    let isOverlayHeadCollapsed = false;
+
+    function setOverlayHeadCollapsed(collapsed) {
+      if (collapsed === isOverlayHeadCollapsed) return;
+      isOverlayHeadCollapsed = collapsed;
+      overlayHead.classList.toggle("is-collapsed", collapsed);
+    }
 
     halls.forEach((hall, i) => {
       const btn = document.createElement("button");
@@ -747,6 +777,8 @@
     function openHallByIndex(hallIndex) {
       activeHallIndex = (hallIndex + halls.length) % halls.length;
       const hall = halls[activeHallIndex];
+      setOverlayHeadCollapsed(false);
+      overlayGrid.scrollTop = 0;
       overlayGrid.classList.add("switching");
       window.setTimeout(() => {
         renderHallContent(hall);
@@ -762,6 +794,8 @@
       hallOverlay.classList.remove("open");
       hallOverlay.setAttribute("aria-hidden", "true");
       document.body.style.overflow = "";
+      setOverlayHeadCollapsed(false);
+      overlayGrid.scrollTop = 0;
     }
     function openMenu() {
       hallMenu.classList.add("open");
@@ -791,6 +825,9 @@
     });
     hallOverlay.addEventListener("click", (e) => {
       if (e.target === hallOverlay) closeHall();
+    });
+    overlayGrid.addEventListener("scroll", () => {
+      setOverlayHeadCollapsed(overlayGrid.scrollTop > 6);
     });
 
     timeline.forEach((item) => {
