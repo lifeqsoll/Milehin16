@@ -138,12 +138,49 @@
       flex-wrap: wrap;
       color: var(--muted);
     }
+    .thumbs-wrapper { position: relative; margin-top: 11px; }
     .thumbs {
-      margin-top: 11px;
       display: grid;
       grid-template-columns: repeat(10, minmax(0, 1fr));
       gap: 6px;
+      transition: max-height .5s cubic-bezier(.4, 0, .2, 1), opacity .3s ease;
     }
+    .thumbs.collapsed {
+      max-height: 140px;
+      overflow: hidden;
+      position: relative;
+    }
+    .thumbs.collapsed::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background: linear-gradient(to bottom, transparent, #f6efe6);
+      pointer-events: none;
+    }
+    .expand-btn {
+      display: block;
+      width: 100%;
+      margin-top: 12px;
+      padding: 12px 20px;
+      border: 1px solid #c7ad99;
+      border-radius: 10px;
+      background: linear-gradient(180deg, #f9f2e8, #f0e6d8);
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .25s ease;
+    }
+    .expand-btn:hover {
+      background: linear-gradient(180deg, #fff8ef, #f5ece1);
+      border-color: var(--accent-soft);
+      transform: translateY(-1px);
+    }
+    .expand-btn:active { transform: translateY(0) scale(.98); }
+    .expand-btn.hidden { display: none; }
     .thumbs img {
       width: 100%;
       height: 64px;
@@ -347,15 +384,23 @@
       .timeline-grid { grid-template-columns: 1fr; }
       .event { padding: 10px; font-size: .96rem; }
       .thumbs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .thumbs.collapsed { grid-template-columns: repeat(4, minmax(0, 1fr)); max-height: 140px; overflow: hidden; position: relative; }
+      .thumbs.collapsed::after { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(transparent, #f6efe6); pointer-events: none; }
       .viewer { height: 50vh; }
-      .overlay-grid { display: block; padding: 10px; }
-      .overlay-card { display: block; margin-bottom: 10px; }
-      .overlay-card img { height: auto; max-height: 230px; }
-      .overlay-card .txt { min-height: 0; font-size: .97rem; line-height: 1.66; padding: 11px; display: block; }
-      .overlay-head { align-items: start; flex-direction: column; }
-      .overlay-nav { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-      .overlay-nav button { font-size: .9rem; padding: 9px 10px; }
-      .close-btn { width: 100%; }
+      .overlay-inner { padding: 12px 0 14px; }
+      .overlay-grid { display: flex; flex-direction: column; gap: 16px; padding: 12px; }
+      .overlay-card { display: flex; flex-direction: column; margin-bottom: 0; border-radius: 12px; overflow: hidden; }
+      .overlay-card img { width: 100%; height: auto; max-height: none; object-fit: cover; display: block; order: -1; }
+      .overlay-card .txt { min-height: auto; font-size: 1rem; line-height: 1.7; padding: 14px; display: block; order: 1; }
+      .overlay-card .txt p { margin: 0 0 12px; }
+      .overlay-card .txt p:last-child { margin-bottom: 0; }
+      .overlay-card h4 { margin: 0 0 10px; font-size: 1.1rem; }
+      .overlay-head { align-items: start; flex-direction: column; padding: 10px; }
+      .overlay-head h3 { font-size: 1.1rem; }
+      .overlay-head p { font-size: .95rem; line-height: 1.5; }
+      .overlay-nav { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+      .overlay-nav button { font-size: .88rem; padding: 10px 8px; }
+      .close-btn { width: 100%; padding: 10px; }
     }
   </style>
 </head>
@@ -394,7 +439,10 @@
         <span id="photoCaption"></span>
         <span id="photoCounter"></span>
       </div>
-      <div class="thumbs" id="thumbs"></div>
+      <div class="thumbs-wrapper">
+        <div class="thumbs collapsed" id="thumbs"></div>
+        <button class="expand-btn" id="expandBtn" type="button">Показать все фотографии</button>
+      </div>
     </section>
   </main>
 
@@ -436,6 +484,17 @@
       "assets/hall-photos/hall-039.png", "assets/hall-photos/hall-041.jpeg", "assets/hall-photos/hall-043.jpeg",
       "assets/hall-photos/hall-046.jpeg", "assets/hall-photos/hall-047.jpeg", "assets/hall-photos/hall-048.jpeg",
       "assets/hall-photos/hall-049.jpeg", "assets/hall-photos/hall-050.jpeg", "assets/hall-photos/hall-053.jpeg",
+      "assets/hall-photos/hall-055.png", "assets/hall-photos/hall-057.png", "assets/hall-photos/hall-059.png",
+      "assets/hall-photos/hall-065.jpeg", "assets/hall-photos/hall-067.png", "assets/hall-photos/hall-069.jpeg",
+      "assets/hall-photos/hall-071.png", "assets/hall-photos/hall-073.png", "assets/hall-photos/hall-075.png",
+      "assets/hall-photos/hall-077.png", "assets/hall-photos/hall-080.jpeg", "assets/hall-photos/hall-082.jpeg",
+      "assets/hall-photos/hall-084.png", "assets/hall-photos/hall-086.png", "assets/hall-photos/hall-088.png",
+      "assets/hall-photos/hall-090.jpeg", "assets/hall-photos/hall-092.png", "assets/hall-photos/hall-095.png",
+      "assets/hall-photos/hall-097.png", "assets/hall-photos/hall-098.png", "assets/hall-photos/hall-099.png",
+      "assets/hall-photos/hall-102.png", "assets/hall-photos/hall-104.png", "assets/hall-photos/hall-106.jpeg",
+      "assets/hall-photos/hall-107.png", "assets/hall-photos/hall-108.jpeg", "assets/hall-photos/hall-109.jpeg",
+      "assets/hall-photos/hall-110.jpeg", "assets/hall-photos/hall-112.png", "assets/hall-photos/hall-114.png",
+      "assets/hall-photos/hall-116.png", "assets/hall-photos/hall-118.jpeg", "assets/hall-photos/hall-119.png",
       "assets/hall-photos/hall-user-01.webp", "assets/hall-photos/hall-user-02.jpg", "assets/hall-photos/hall-user-03.jpg",
       "assets/hall-photos/hall-user-04.jpg", "assets/hall-photos/hall-user-05.png", "assets/hall-photos/hall-user-06.jpg"
     ];
@@ -720,6 +779,26 @@
     });
 
     renderPhoto(0);
+
+    // Collapsible gallery functionality
+    const expandBtn = document.getElementById("expandBtn");
+    const thumbsEl = document.getElementById("thumbs");
+    let isExpanded = false;
+
+    expandBtn.addEventListener("click", () => {
+      isExpanded = !isExpanded;
+      if (isExpanded) {
+        thumbsEl.classList.remove("collapsed");
+        expandBtn.textContent = "Свернуть";
+      } else {
+        thumbsEl.classList.add("collapsed");
+        expandBtn.textContent = "Показать все фотографии";
+        // Smooth scroll back to gallery section when collapsing
+        if (window.innerWidth <= 640) {
+          document.querySelector(".gallery").scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+    });
   </script>
 </body>
 </html>
