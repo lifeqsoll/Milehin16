@@ -143,15 +143,14 @@
       display: grid;
       grid-template-columns: repeat(10, minmax(0, 1fr));
       gap: 6px;
-      max-height: 3000px;
-      overflow: visible;
-      transition: max-height .6s cubic-bezier(.25, .46, .45, .94), opacity .4s ease;
-      will-change: max-height;
-    }
-    .thumbs.collapsed {
-      max-height: 148px;
       overflow: hidden;
       position: relative;
+      clip-path: inset(0 0 0 0);
+      transition: clip-path .45s cubic-bezier(.22, .61, .36, 1);
+      will-change: clip-path;
+    }
+    .thumbs.collapsed {
+      clip-path: inset(0 0 calc(100% - 148px) 0);
     }
     .thumbs.collapsed::after {
       content: "";
@@ -162,6 +161,12 @@
       height: 50px;
       background: linear-gradient(to bottom, transparent, #f6efe6);
       pointer-events: none;
+      opacity: 1;
+      transition: opacity .3s ease .15s;
+    }
+    .thumbs:not(.collapsed)::after {
+      opacity: 0;
+      transition: opacity .2s ease;
     }
     .expand-btn {
       display: block;
@@ -453,7 +458,27 @@
       .overlay-head p { font-size: .95rem; line-height: 1.5; margin: 6px 0 0; }
       .overlay-nav { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
       .overlay-nav button { font-size: .88rem; padding: 10px 8px; }
-      .close-btn { width: 100%; padding: 10px; }
+      .overlay-nav .main-link { display: none; }
+      .close-btn { display: none; }
+      .mobile-main-btn {
+        display: block !important;
+        width: 100%;
+        margin-top: 12px;
+        padding: 14px 20px;
+        border: 1px solid #c7ad99;
+        border-radius: 10px;
+        background: linear-gradient(180deg, #c4162a, #a91122);
+        color: #fff;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform .15s ease, filter .2s ease;
+      }
+      .mobile-main-btn:hover { filter: brightness(1.08); }
+      .mobile-main-btn:active { transform: scale(.97); }
+    }
+    @media (min-width: 641px) {
+      .mobile-main-btn { display: none !important; }
     }
   </style>
 </head>
@@ -518,6 +543,7 @@
             <button id="toMainBtn" class="main-link" type="button">Главный зал</button>
             <button id="nextHallBtn" type="button">Следующий зал</button>
           </div>
+          <button class="mobile-main-btn" id="mobileMainBtn" type="button">Главный зал</button>
         </div>
         <button class="close-btn" id="closeOverlay" type="button">Закрыть зал</button>
       </div>
@@ -763,6 +789,12 @@
     prevHallBtn.addEventListener("click", () => openHallByIndex(activeHallIndex - 1));
     nextHallBtn.addEventListener("click", () => openHallByIndex(activeHallIndex + 1));
     toMainBtn.addEventListener("click", () => {
+      closeHall();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    const mobileMainBtn = document.getElementById("mobileMainBtn");
+    mobileMainBtn.addEventListener("click", () => {
       closeHall();
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
