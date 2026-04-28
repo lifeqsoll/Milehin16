@@ -396,10 +396,36 @@
       .main-content p { font-size: 1rem; line-height: 1.68; }
       .timeline-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .thumbs { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-      .overlay-grid { grid-template-columns: 1fr; }
-      .overlay-card { display: flex; flex-direction: column; }
-      .overlay-card img { order: -1; width: 100%; height: auto; max-height: 50vh; object-fit: cover; }
-      .overlay-card .txt { min-height: auto; font-size: .98rem; order: 1; }
+      .hall-overlay .overlay-grid {
+        display: flex;
+        flex-direction: column;
+        grid-template-columns: none;
+        grid-template-rows: none;
+        gap: 16px;
+        overflow-y: auto;
+      }
+      .hall-overlay .overlay-card {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+      }
+      .hall-overlay .overlay-card img {
+        order: -1;
+        width: 100%;
+        height: auto;
+        max-height: 42vh;
+        object-fit: cover;
+        display: block;
+      }
+      .hall-overlay .overlay-card .txt {
+        display: block;
+        visibility: visible;
+        opacity: 1;
+        min-height: auto;
+        height: auto;
+        font-size: .98rem;
+        order: 1;
+      }
     }
     @media (max-width: 640px) {
       .wrap { width: min(1220px, 96vw); padding: 14px 0 22px; }
