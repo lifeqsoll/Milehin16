@@ -37,16 +37,20 @@
     }
     .top-actions { display: flex; justify-content: flex-end; margin-bottom: 12px; }
     .open-menu-btn {
-      border: 1px solid #a93645;
-      background: linear-gradient(90deg, #c4162a, #a91122);
+      border: 1px solid #a11224;
+      background: linear-gradient(180deg, #cf1a30, #a80f21);
       color: #fff;
       padding: 10px 14px;
       border-radius: 10px;
       cursor: pointer;
       font-weight: 600;
-      transition: transform .16s ease, filter .2s ease;
+      box-shadow: 0 8px 18px rgba(154, 18, 35, .28);
+      transition: transform .18s ease, filter .2s ease, box-shadow .2s ease;
     }
-    .open-menu-btn:hover { filter: brightness(1.08); }
+    .open-menu-btn:hover {
+      filter: brightness(1.08);
+      box-shadow: 0 12px 24px rgba(154, 18, 35, .34);
+    }
     .open-menu-btn:active { transform: translateY(1px) scale(.98); }
 
     .main-hall {
@@ -247,6 +251,9 @@
       padding: 10px;
       background: #f4ece0;
     }
+    .menu-head b {
+      color: var(--accent);
+    }
     .close-menu-btn {
       border: 1px solid #c9ae99;
       border-radius: 8px;
@@ -336,9 +343,14 @@
       color: var(--text);
       padding: 8px 11px;
       cursor: pointer;
-      transition: transform .15s ease, border-color .2s ease, background .2s ease;
+      transition: transform .18s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
     }
-    .overlay-nav button:hover { border-color: var(--accent-soft); background: #efe2d4; }
+    .overlay-nav button:hover {
+      border-color: var(--accent-soft);
+      background: #efe2d4;
+      transform: scale(1.08);
+      box-shadow: 0 8px 16px rgba(102, 35, 26, .18);
+    }
     .overlay-nav button:active { transform: scale(.97); }
     .overlay-nav { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
     .overlay-nav .main-link { border-color: #c7ad99; background: #f5ece1; color: var(--text); }
