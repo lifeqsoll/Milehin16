@@ -143,10 +143,13 @@
       display: grid;
       grid-template-columns: repeat(10, minmax(0, 1fr));
       gap: 6px;
-      transition: max-height .5s cubic-bezier(.4, 0, .2, 1), opacity .3s ease;
+      max-height: 3000px;
+      overflow: visible;
+      transition: max-height .6s cubic-bezier(.25, .46, .45, .94), opacity .4s ease;
+      will-change: max-height;
     }
     .thumbs.collapsed {
-      max-height: 140px;
+      max-height: 148px;
       overflow: hidden;
       position: relative;
     }
@@ -372,8 +375,10 @@
       .main-content p { font-size: 1rem; line-height: 1.68; }
       .timeline-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .thumbs { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-      .overlay-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .overlay-card .txt { min-height: 205px; font-size: .98rem; }
+      .overlay-grid { grid-template-columns: 1fr; }
+      .overlay-card { display: flex; flex-direction: column; }
+      .overlay-card img { order: -1; width: 100%; height: auto; max-height: 50vh; object-fit: cover; }
+      .overlay-card .txt { min-height: auto; font-size: .98rem; order: 1; }
     }
     @media (max-width: 640px) {
       .wrap { width: min(1220px, 96vw); padding: 14px 0 22px; }
@@ -388,44 +393,64 @@
       .thumbs.collapsed::after { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(transparent, #f6efe6); pointer-events: none; }
       .viewer { height: 50vh; }
       .overlay-inner { padding: 12px 0 14px; }
-      .overlay-grid {
+      .hall-overlay .overlay-grid {
         display: flex !important;
         flex-direction: column !important;
-        gap: 16px;
-        padding: 12px;
         grid-template-columns: none !important;
+        grid-template-rows: none !important;
+        gap: 20px;
+        padding: 16px;
+        overflow-y: auto;
+        max-height: calc(100vh - 180px);
       }
-      .overlay-card {
-        display: flex;
-        flex-direction: column;
-        margin-bottom: 0;
+      .hall-overlay .overlay-card {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        margin: 0 0 20px 0;
         border-radius: 12px;
         overflow: hidden;
-        width: 100%;
+        flex-shrink: 0;
       }
-      .overlay-card img {
-        width: 100%;
-        height: auto;
-        max-height: 50vh;
-        min-height: 200px;
-        object-fit: cover;
-        display: block;
-        order: -1;
+      .hall-overlay .overlay-card img {
+        width: 100% !important;
+        height: auto !important;
+        max-height: 55vh !important;
+        min-height: 220px !important;
+        object-fit: cover !important;
+        display: block !important;
+        order: -1 !important;
       }
-      .overlay-card .txt {
-        min-height: auto;
-        font-size: 1rem;
-        line-height: 1.7;
-        padding: 14px;
-        display: block;
-        order: 1;
+      .hall-overlay .overlay-card .txt {
+        display: block !important;
+        order: 1 !important;
+        width: 100% !important;
+        min-height: auto !important;
+        height: auto !important;
+        font-size: 1.05rem !important;
+        line-height: 1.75 !important;
+        padding: 16px !important;
+        background: var(--paper) !important;
+        border-top: 1px solid #d5beaa !important;
+        visibility: visible !important;
+        opacity: 1 !important;
       }
-      .overlay-card .txt p { margin: 0 0 12px; }
-      .overlay-card .txt p:last-child { margin-bottom: 0; }
-      .overlay-card h4 { margin: 0 0 10px; font-size: 1.1rem; }
-      .overlay-head { align-items: start; flex-direction: column; padding: 10px; }
-      .overlay-head h3 { font-size: 1.1rem; }
-      .overlay-head p { font-size: .95rem; line-height: 1.5; }
+      .hall-overlay .overlay-card .txt h4 {
+        margin: 0 0 12px 0 !important;
+        font-size: 1.15rem !important;
+        color: #a1172a !important;
+        display: block !important;
+      }
+      .hall-overlay .overlay-card .txt p {
+        margin: 0 0 12px 0 !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+      .hall-overlay .overlay-card .txt p:last-child { margin-bottom: 0 !important; }
+      .overlay-head { align-items: start; flex-direction: column; padding: 12px; }
+      .overlay-head h3 { font-size: 1.15rem; }
+      .overlay-head p { font-size: .95rem; line-height: 1.5; margin: 6px 0 0; }
       .overlay-nav { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
       .overlay-nav button { font-size: .88rem; padding: 10px 8px; }
       .close-btn { width: 100%; padding: 10px; }
@@ -821,9 +846,11 @@
       } else {
         thumbsEl.classList.add("collapsed");
         expandBtn.textContent = "Показать все фотографии";
-        // Smooth scroll back to gallery section when collapsing
-        if (window.innerWidth <= 640) {
-          document.querySelector(".gallery").scrollIntoView({ behavior: "smooth", block: "start" });
+        // Smooth scroll back to gallery section when collapsing on mobile
+        if (window.innerWidth <= 980) {
+          setTimeout(() => {
+            document.querySelector(".gallery").scrollIntoView({ behavior: "smooth", block: "start" });
+          }, 300);
         }
       }
     });
