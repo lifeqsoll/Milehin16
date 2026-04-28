@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Веб-экскурсия: Иван Федорович Милёхин</title>
+  <style>
+    :root {
+      --bg: #f3eadc;
+      --bg-soft: #fbf5ec;
+      --paper: #fff8ef;
+      --paper-line: #d6beaa;
+      --text: #2f2622;
+      --muted: #78645b;
+      --accent: #c4162a;
+      --accent-soft: #de4a5f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #f7f1e6 0%, #efe5d5 55%, #e8dcc9 100%);
+    }
+    .wrap {
+      width: min(1220px, 94vw);
+      margin: 0 auto;
+      padding: 22px 0 30px;
+    }
+    .top-actions { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+    .open-menu-btn {
+      border: 1px solid #a93645;
+      background: linear-gradient(90deg, #c4162a, #a91122);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform .16s ease, filter .2s ease;
+    }
+    .open-menu-btn:hover { filter: brightness(1.08); }
+    .open-menu-btn:active { transform: translateY(1px) scale(.98); }
+
+    .main-hall {
+      min-height: 74vh;
+      border: 2px solid #cdb29e;
+      border-radius: 16px;
+      padding: 26px;
+      background: linear-gradient(125deg, rgba(30, 6, 10, .20), rgba(14, 4, 6, .80)),
+        url("assets/hall-photos/hall-user-06.jpg") center/cover no-repeat;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: end;
+      color: #fff3f3;
+    }
+    .main-hall::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(26, 6, 10, .16), rgba(16, 4, 6, .9) 68%);
+    }
+    .main-content { position: relative; z-index: 1; max-width: 880px; }
+    .main-content h1 { margin: 0 0 10px; font-size: clamp(1.7rem, 3vw, 2.45rem); }
+    .main-content p { margin: 0 0 14px; line-height: 1.7; font-size: 1.05rem; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      border: 1px solid #d59eaa;
+      border-radius: 999px;
+      padding: 7px 12px;
+      background: rgba(46, 12, 18, .72);
+      font-size: .91rem;
+      color: #fff3f3;
+    }
+
+    .timeline, .gallery {
+      margin-top: 18px;
+      border: 2px solid #d2b8a5;
+      border-radius: 16px;
+      padding: 15px;
+      background: rgba(248, 242, 233, .98);
+    }
+    h2 { margin: 0 0 10px; font-size: 1.2rem; color: var(--accent); }
+    .timeline-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .event {
+      border: 1px solid #ddc6b3;
+      border-radius: 12px;
+      padding: 11px;
+      line-height: 1.55;
+      background: #fff8ef;
+    }
+    .event b { color: var(--accent); }
+
+    .viewer {
+      position: relative;
+      border: 1px solid #d6beaa;
+      border-radius: 12px;
+      height: min(62vh, 530px);
+      background: #2a0911;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      touch-action: pan-y;
+    }
+    .viewer img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      background: #2a0911;
+    }
+    .arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid #a03b4d;
+      background: rgba(41, 9, 17, .82);
+      color: #fff;
+      font-size: 1.35rem;
+      cursor: pointer;
+      transition: transform .16s ease, background .2s ease;
+    }
+    .arrow:hover { background: rgba(69, 14, 26, .95); }
+    .arrow:active { transform: translateY(-50%) scale(.94); }
+    .arrow.left { left: 10px; }
+    .arrow.right { right: 10px; }
+    .caption {
+      margin-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      color: var(--muted);
+    }
+    .thumbs {
+      margin-top: 11px;
+      display: grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      gap: 6px;
+    }
+    .thumbs img {
+      width: 100%;
+      height: 64px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      background: #e7d6c5;
+      transition: transform .15s ease, border-color .2s ease;
+    }
+    .thumbs img:hover { transform: translateY(-2px); }
+    .thumbs img:active { transform: translateY(0) scale(.96); }
+    .thumbs img.active { border-color: var(--accent); }
+
+    .hall-menu-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(12, 2, 4, .3);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .35s ease;
+      z-index: 60;
+    }
+    .hall-menu-backdrop.open { opacity: 1; pointer-events: auto; }
+    .hall-menu {
+      position: fixed;
+      right: 16px;
+      top: 16px;
+      width: min(360px, calc(100vw - 24px));
+      height: calc(100vh - 32px);
+      border: 2px solid #d2b8a5;
+      border-radius: 16px;
+      padding: 10px;
+      background: rgba(248, 242, 233, .99);
+      color: var(--text);
+      display: grid;
+      gap: 8px;
+      align-content: start;
+      transform: translateX(108%);
+      transition: transform .38s cubic-bezier(.22, .61, .36, 1);
+      z-index: 70;
+      overflow: auto;
+    }
+    .hall-menu.open { transform: translateX(0); }
+    .menu-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid #dcc4b1;
+      border-radius: 12px;
+      padding: 10px;
+      background: #f4ece0;
+    }
+    .close-menu-btn {
+      border: 1px solid #c9ae99;
+      border-radius: 8px;
+      background: #f9f2e8;
+      color: var(--text);
+      padding: 6px 10px;
+      cursor: pointer;
+      transition: transform .14s ease, background .2s ease;
+    }
+    .close-menu-btn:hover { background: #efe2d2; }
+    .close-menu-btn:active { transform: scale(.96); }
+    .hall-menu button {
+      border: 1px solid #d7bfae;
+      border-radius: 12px;
+      background: #fff8ef;
+      color: var(--text);
+      padding: 12px;
+      text-align: left;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform .16s ease, border-color .2s ease, background .2s ease;
+    }
+    .hall-menu button:hover { border-color: var(--accent-soft); background: #fff2e5; transform: translateX(-2px); }
+    .hall-menu button:active { transform: translateX(0) scale(.98); }
+    .hall-menu small { display: block; color: var(--muted); margin-top: 4px; font-weight: 400; }
+
+    .hall-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(245, 236, 223, .96);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .34s ease;
+    }
+    .hall-overlay.open { opacity: 1; pointer-events: auto; }
+    .overlay-inner {
+      height: 100%;
+      width: min(1280px, 96vw);
+      margin: 0 auto;
+      padding: 16px 0 18px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 12px;
+      transform: scale(.985);
+      transition: transform .34s ease;
+    }
+    .hall-overlay.open .overlay-inner { transform: scale(1); }
+    .overlay-head {
+      border: 1px solid #d8c4b2;
+      border-radius: 14px;
+      background: #fff8ef;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      color: var(--text);
+    }
+    .overlay-head h3 { margin: 0; font-size: 1.2rem; color: var(--accent); }
+    .overlay-head p { margin: 4px 0 0; color: var(--muted); line-height: 1.45; }
+
+    .close-btn, .overlay-nav button {
+      border: 1px solid #c7ad99;
+      border-radius: 9px;
+      background: #f5ece1;
+      color: var(--text);
+      padding: 8px 11px;
+      cursor: pointer;
+      transition: transform .15s ease, border-color .2s ease, background .2s ease;
+    }
+    .close-btn { border-radius: 10px; }
+    .close-btn:hover, .overlay-nav button:hover { border-color: var(--accent-soft); background: #efe2d4; }
+    .close-btn:active, .overlay-nav button:active { transform: scale(.97); }
+    .overlay-nav { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+    .overlay-nav .main-link { border-color: #c7ad99; background: #f5ece1; color: var(--text); }
+
+    .overlay-grid {
+      overflow: auto;
+      border: 1px solid #dbc7b5;
+      border-radius: 14px;
+      padding: 12px;
+      background: #f6efe6;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity .28s ease, transform .28s ease;
+    }
+    .overlay-grid.switching { opacity: 0; transform: translateY(10px); }
+    .overlay-card {
+      border: 1px solid #d5beaa;
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--paper);
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+      transform-origin: center center;
+    }
+    .overlay-card img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      display: block;
+      background: #e4d8cc;
+    }
+    .overlay-card .txt {
+      padding: 12px;
+      line-height: 1.62;
+      color: var(--text);
+      font-size: 1rem;
+      min-height: 240px;
+      background: var(--paper);
+      border-top: 1px solid #d5beaa;
+      transition: background .2s ease;
+    }
+    .overlay-card .txt p { margin: 0 0 10px; }
+    .overlay-card .txt p:last-child { margin-bottom: 0; }
+    .overlay-card h4 { margin: 0 0 8px; font-size: 1.03rem; color: #a1172a; }
+
+
+    @media (hover: hover) and (min-width: 981px) {
+      .overlay-card:hover {
+        transform: scale(1.015);
+        border-color: var(--accent);
+        box-shadow: 0 10px 20px rgba(106, 22, 31, 0.24);
+        position: relative;
+        z-index: 2;
+      }
+      .overlay-card:hover .txt {
+        background: #fff6ed;
+      }
+    }
+    @media (max-width: 980px) {
+      .main-hall { min-height: 62vh; }
+      .main-content p { font-size: 1rem; line-height: 1.68; }
+      .timeline-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .thumbs { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+      .overlay-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .overlay-card .txt { min-height: 205px; font-size: .98rem; }
+    }
+    @media (max-width: 640px) {
+      .wrap { width: min(1220px, 96vw); padding: 14px 0 22px; }
+      .open-menu-btn { padding: 9px 12px; font-size: .95rem; }
+      .main-content h1 { font-size: 1.45rem; line-height: 1.3; }
+      .main-content p { font-size: .98rem; line-height: 1.7; }
+      .chip { font-size: .83rem; padding: 6px 10px; }
+      .timeline-grid { grid-template-columns: 1fr; }
+      .event { padding: 10px; font-size: .96rem; }
+      .thumbs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .viewer { height: 50vh; }
+      .overlay-grid { display: block; padding: 10px; }
+      .overlay-card { display: block; margin-bottom: 10px; }
+      .overlay-card img { height: auto; max-height: 230px; }
+      .overlay-card .txt { min-height: 0; font-size: .97rem; line-height: 1.66; padding: 11px; display: block; }
+      .overlay-head { align-items: start; flex-direction: column; }
+      .overlay-nav { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .overlay-nav button { font-size: .9rem; padding: 9px 10px; }
+      .close-btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="top-actions">
+      <button class="open-menu-btn" id="openMenuBtn" type="button">Выбор залов</button>
+    </div>
+
+    <article class="main-hall">
+      <div class="main-content">
+        <h1>Главный зал: Иван Федорович Милёхин</h1>
+        <p>Добро пожаловать на веб-экскурсию. Здесь собраны материалы о фронтовом и общественном пути Ивана Федоровича Милёхина: от довоенных лет до создания Поста №1 в Калуге. Каждый зал открывается на весь экран и содержит 3 фотографии с подробными пояснениями.</p>
+        <div class="chips">
+          <span class="chip">Почетный гражданин Калуги</span>
+          <span class="chip">Первый начальник Поста №1</span>
+          <span class="chip">Имя школы №16</span>
+          <span class="chip">Участник освобождения Калужской земли</span>
+        </div>
+      </div>
+    </article>
+
+    <section class="timeline">
+      <h2>Ключевые даты</h2>
+      <div class="timeline-grid" id="timelineGrid"></div>
+    </section>
+
+    <section class="gallery">
+      <h2>Фотоархив</h2>
+      <div class="viewer" id="photoViewer">
+        <button class="arrow left" id="prevBtn" type="button">‹</button>
+        <img id="mainPhoto" alt="Фото" loading="eager">
+        <button class="arrow right" id="nextBtn" type="button">›</button>
+      </div>
+      <div class="caption">
+        <span id="photoCaption"></span>
+        <span id="photoCounter"></span>
+      </div>
+      <div class="thumbs" id="thumbs"></div>
+    </section>
+  </main>
+
+  <div class="hall-menu-backdrop" id="hallMenuBackdrop"></div>
+  <aside class="hall-menu" id="hallMenu" aria-hidden="true">
+    <div class="menu-head">
+      <b>Залы экскурсии</b>
+      <button class="close-menu-btn" id="closeMenuBtn" type="button">Закрыть</button>
+    </div>
+  </aside>
+
+  <section class="hall-overlay" id="hallOverlay" aria-hidden="true">
+    <div class="overlay-inner">
+      <div class="overlay-head">
+        <div>
+          <h3 id="overlayTitle"></h3>
+          <p id="overlayLead"></p>
+          <div class="overlay-nav">
+            <button id="prevHallBtn" type="button">Предыдущий зал</button>
+            <button id="toMainBtn" class="main-link" type="button">Главный зал</button>
+            <button id="nextHallBtn" type="button">Следующий зал</button>
+          </div>
+        </div>
+        <button class="close-btn" id="closeOverlay" type="button">Закрыть зал</button>
+      </div>
+      <div class="overlay-grid" id="overlayGrid"></div>
+    </div>
+  </section>
+
+  <script>
+    const archivePhotos = [
+      "assets/hall-photos/hall-001.jpeg", "assets/hall-photos/hall-003.jpeg", "assets/hall-photos/hall-005.jpeg",
+      "assets/hall-photos/hall-007.jpeg", "assets/hall-photos/hall-009.jpeg", "assets/hall-photos/hall-011.jpeg",
+      "assets/hall-photos/hall-012.jpeg", "assets/hall-photos/hall-013.jpeg", "assets/hall-photos/hall-015.jpeg",
+      "assets/hall-photos/hall-017.jpeg", "assets/hall-photos/hall-019.jpeg", "assets/hall-photos/hall-021.png",
+      "assets/hall-photos/hall-023.jpeg", "assets/hall-photos/hall-025.jpeg", "assets/hall-photos/hall-027.jpeg",
+      "assets/hall-photos/hall-029.jpeg", "assets/hall-photos/hall-030.jpeg", "assets/hall-photos/hall-032.jpeg",
+      "assets/hall-photos/hall-034.png", "assets/hall-photos/hall-036.jpeg", "assets/hall-photos/hall-038.jpeg",
+      "assets/hall-photos/hall-039.png", "assets/hall-photos/hall-041.jpeg", "assets/hall-photos/hall-043.jpeg",
+      "assets/hall-photos/hall-046.jpeg", "assets/hall-photos/hall-047.jpeg", "assets/hall-photos/hall-048.jpeg",
+      "assets/hall-photos/hall-049.jpeg", "assets/hall-photos/hall-050.jpeg", "assets/hall-photos/hall-053.jpeg",
+      "assets/hall-photos/hall-user-01.webp", "assets/hall-photos/hall-user-02.jpg", "assets/hall-photos/hall-user-03.jpg",
+      "assets/hall-photos/hall-user-04.jpg", "assets/hall-photos/hall-user-05.png", "assets/hall-photos/hall-user-06.jpg"
+    ];
+
+    const halls = [
+      {
+        id: "childhood",
+        title: "Зал детства",
+        lead: "Семья, учеба, первые профессии и довоенное становление Ивана Федоровича. Родился 21 февраля 1917 года в деревне Алпеево Орловской области; до войны работал в хозяйстве, на производстве и в комсомольских структурах. В этот период сформировались его дисциплина, организаторские качества и ответственность, которые позже помогли на фронте и в общественной работе.",
+        cards: [
+          {
+            photo: "assets/hall-photos/hall-user-05.png",
+            title: "Родина и семья",
+            text: "Иван Федорович Милёхин родился 21 февраля 1917 года в деревне Алпеево Орловской области. Детство проходило в крестьянской среде, где труд и взаимопомощь были нормой. В юности он рано включился в общественную жизнь и привык к ответственности за общее дело. Уже в молодом возрасте ему доверяли организационные задачи, что помогло сформировать уверенный, собранный характер и уважение к коллективной дисциплине."
+          },
+          {
+            photo: "assets/hall-photos/hall-030.jpeg",
+            title: "Учеба и первые годы работы",
+            text: "После окончания школы крестьянской молодежи он получил практический опыт в разных сферах: на производстве, в учетной и организационной деятельности. Этот период выработал точность, аккуратность и ответственное отношение к каждому порученному делу. В дальнейшем именно эти качества помогли ему быстро принимать решения и держать высокий уровень личной дисциплины в условиях военной службы. По документам проекта, этот опыт стал фундаментом его будущей командирской работы в боевых условиях."
+          },
+          {
+            photo: "assets/hall-photos/hall-050.jpeg",
+            title: "Комсомольская работа до войны",
+            text: "В предвоенные годы Милёхин занимался общественной и комсомольской работой: участвовал в просветительских мероприятиях, работал с молодежью и коллективами. Этот опыт стал его первой школой руководства, умения принимать решения и нести личную ответственность. Уже до войны он сформировал привычку работать с людьми и вести коллектив к общей цели, что позже стало важным в армейской службе. Поэтому в сложных ситуациях он умел сохранять порядок в подразделении и поддерживать моральный настрой личного состава."
+          }
+        ]
+      },
+      {
+        id: "war",
+        title: "Зал войны",
+        lead: "Фронтовой путь, ранения, освобождение территорий и воинский долг. За годы войны Иван Федорович был неоднократно ранен, но возвращался в строй и продолжал командную службу. Участвовал в операциях на калужском направлении, в том числе при освобождении Воротынска, и прошел большой боевой путь в составе действующей армии.",
+        cards: [
+          {
+            photo: "assets/hall-photos/hall-user-02.jpg",
+            title: "Начало Великой Отечественной войны",
+            text: "С первых месяцев войны Иван Федорович оказался в тяжелой боевой обстановке. После выхода из окружения он продолжил службу в действующей армии. Эти качества позволили ему сохранить самообладание и руководить людьми в критических условиях. Свидетельства в источниках подчеркивают его собранность, выносливость и умение действовать без паники даже под сильным давлением."
+          },
+          {
+            photo: "assets/hall-photos/hall-user-04.jpg",
+            title: "Бои за Воротынск и Калужскую землю",
+            text: "В декабре 1941 года Милёхин участвовал в освобождении станции Воротынск и населенных пунктов калужского направления. Успешное выполнение боевых задач на этом участке стало важной частью его фронтовой биографии и было отмечено наградой. В источниках проекта этот эпизод рассматривается как один из ключевых в его военном пути и в истории освобождения калужского направления. Успех этой операции имел значение не только для локального участка фронта, но и для дальнейшего продвижения советских войск."
+          },
+          {
+            photo: "assets/hall-photos/hall-046.jpeg",
+            title: "Боевой итог",
+            text: "В составе 50-й армии Иван Федорович участвовал в освобождении десятков городов и множества населенных пунктов. Он был неоднократно ранен, но возвращался в строй. Его военный путь стал примером личного мужества и верности службе. В разных периодах войны он демонстрировал не только личную стойкость, но и ответственное отношение к бойцам, что особенно ценилось в командирской практике того времени. По воспоминаниям сослуживцев, он всегда уделял внимание не только выполнению задачи, но и сохранению людей в бою."
+          }
+        ]
+      },
+      {
+        id: "awards",
+        title: "Зал наград",
+        lead: "Боевые награды как подтверждение личного подвига и командирской работы. В биографии отмечаются орден Красной Звезды, орден Красного Знамени и другие награды за мужество и командирские решения. Награды отражают не единичный подвиг, а многолетнюю фронтовую службу и ответственность за личный состав.",
+        cards: [
+          {
+            photo: "assets/hall-photos/hall-001.jpeg",
+            title: "Орден Красной Звезды",
+            text: "Орден Красной Звезды стал одной из первых значимых наград Ивана Федоровича. Он был отмечен за действия на калужском направлении, в том числе в боях, связанных с освобождением Воротынска. Награда подчеркивает личную смелость и ответственность командира. Для историков и педагогов эта награда важна как документальное подтверждение его конкретного вклада в боевые действия на калужском направлении."
+          },
+          {
+            photo: "assets/hall-photos/hall-003.jpeg",
+            title: "Ордена и медали военных лет",
+            text: "По документам и материалам проекта Милёхин награждался за мужество, выдержку и эффективное руководство подразделениями. Наградной путь показывает системный вклад в дело Победы, а не единичный боевой эпизод. Биографические материалы демонстрируют, что его заслуги фиксировались последовательно, на разных этапах фронтовой службы. За каждой наградой стоит конкретная боевая работа, командирская ответственность и длительная служба в сложнейших условиях фронта."
+          },
+          {
+            photo: "assets/hall-photos/hall-005.jpeg",
+            title: "Награды в музейной работе",
+            text: "Копии наградных документов, фотографии и биографические материалы используются в школьном музее и на уроках мужества. Это позволяет ученикам видеть историю в конкретных фактах и лучше понимать цену воинского долга. Через такие материалы школьники знакомятся с реальными биографиями участников войны и воспринимают историю как личный опыт своего города и своей школы. Это делает музейную и проектную работу не формальной, а действительно воспитательной и ценностно значимой."
+          }
+        ]
+      },
+      {
+        id: "post1",
+        title: "Зал Поста №1",
+        lead: "Традиция Почетной Вахты Памяти в Калуге и вклад Ивана Федоровича Милёхина. С 1975 года Пост №1 у Вечного огня стал одной из ключевых патриотических традиций города. Иван Федорович как первый руководитель штаба заложил ритуал, дисциплину караула и преемственность поколений.",
+        cards: [
+          {
+            photo: "assets/hall-photos/hall-user-06.jpg",
+            title: "Основание Поста №1",
+            text: "6 мая 1975 года в Калуге была открыта Почетная Вахта памяти у Вечного огня. Иван Федорович Милёхин стал первым начальником городского штаба Поста №1 и сформировал организационную систему, сохранявшуюся много лет. Под его руководством были выстроены методика подготовки, церемониальный порядок и практические требования к несению службы, благодаря чему традиция получила устойчивую основу. Он разработал понятную структуру подготовки караула, порядок смен и требования к дисциплине, благодаря чему Пост №1 стал устойчивой городской традицией."
+          },
+          {
+            photo: "assets/hall-photos/hall-073.png",
+            title: "Ритуал и «милёхинский шаг»",
+            text: "При Милёхине сложился особый церемониальный порядок несения службы, включая известный «милёхинский шаг». Этот ритуал объединяет торжественность, четкость действий и уважение к памяти погибших защитников Отечества. Он был задуман как воспитательный инструмент: через форму, шаг и дисциплину подростки осмысляли значение подвига предыдущих поколений. Для школьников участие в церемонии стало важным опытом личной ответственности и понимания связи поколений."
+          },
+          {
+            photo: "assets/hall-photos/hall-075.png",
+            title: "Значение для города",
+            text: "Пост №1 стал одним из символов патриотической культуры Калуги. Для многих участников караула это становилось первым серьезным опытом гражданской ответственности и личного отношения к истории страны. Через караул прошли тысячи подростков, для которых служба на Посту стала школой дисциплины, гражданской ответственности и уважения к истории своей страны. Традиция сохраняется десятилетиями и поддерживается школами, педагогами и ветеранским сообществом города."
+          }
+        ]
+      },
+      {
+        id: "legacy",
+        title: "Зал памяти и наследия",
+        lead: "Сохранение памяти о Милёхине в школе, музее и городских мероприятиях. Школа №16 носит его имя, действует мини-музей и регулярно проходят встречи памяти с участием семьи героя. Память о нем поддерживается не только датами, но и постоянной образовательной работой с учениками.",
+        cards: [
+          {
+            photo: "assets/hall-photos/hall-user-03.jpg",
+            title: "Школа имени И. Ф. Милёхина",
+            text: "Школа №16 в Калуге носит имя Ивана Федоровича Милёхина. В образовательной и воспитательной работе школы его биография используется как пример гражданской зрелости, служения Родине и ответственности перед обществом. На этой основе строятся тематические занятия, проектные конкурсы и встречи, направленные на формирование исторической памяти учащихся. На уроках мужества и тематических встречах ученики знакомятся с документами, фотографиями и воспоминаниями, связанными с его жизненным путем."
+          },
+          {
+            photo: "assets/hall-photos/hall-084.png",
+            title: "Мини-музей и памятник",
+            text: "В школе действует мини-музей с документами, фотографиями и проектными материалами. На территории установлен памятник, где проходят памятные церемонии и встречи. Это делает историческую память частью повседневной школьной жизни. Музейная экспозиция помогает связать архивные документы с современным образовательным процессом и показывает, как личная история героя влияет на жизнь школы сегодня. Экспозиция музея регулярно используется на классных часах, а материалы пополняются благодаря проектной работе учеников и педагогов."
+          },
+          {
+            photo: "assets/hall-photos/hall-086.png",
+            title: "Связь поколений",
+            text: "В памятных школьных и городских мероприятиях участвуют родственники Ивана Федоровича, включая его дочь. Такая личная связь поколений делает историю живой и близкой для учеников, помогает сохранять искреннюю память. Формат живого диалога с семьей героя усиливает эмоциональное восприятие материала и мотивирует школьников глубже изучать историю родного края. Благодаря этому память о Милёхине воспринимается не формально, а как часть реальной семейной и городской истории."
+          }
+        ]
+      }
+    ];
+
+    const timeline = [
+      { year: "1917", text: "21 февраля родился Иван Федорович Милёхин." },
+      { year: "1939", text: "Призван в Красную Армию." },
+      { year: "1941", text: "Начало фронтового пути, тяжелые бои и выход из окружения." },
+      { year: "1941-1943", text: "Участие в освобождении Воротынска и боях на калужской земле." },
+      { year: "1975", text: "Открытие Поста №1 в Калуге и руководство городским штабом." },
+      { year: "2005", text: "После ухода из жизни память о герое продолжена в школе и городе." }
+    ];
+
+    const hallMenu = document.getElementById("hallMenu");
+    const hallMenuBackdrop = document.getElementById("hallMenuBackdrop");
+    const timelineGrid = document.getElementById("timelineGrid");
+    const hallOverlay = document.getElementById("hallOverlay");
+    const overlayTitle = document.getElementById("overlayTitle");
+    const overlayLead = document.getElementById("overlayLead");
+    const overlayGrid = document.getElementById("overlayGrid");
+    const closeOverlay = document.getElementById("closeOverlay");
+    const openMenuBtn = document.getElementById("openMenuBtn");
+    const closeMenuBtn = document.getElementById("closeMenuBtn");
+    const prevHallBtn = document.getElementById("prevHallBtn");
+    const nextHallBtn = document.getElementById("nextHallBtn");
+    const toMainBtn = document.getElementById("toMainBtn");
+    let activeHallIndex = 0;
+
+    halls.forEach((hall, i) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.innerHTML = hall.title + "<small>Открыть зал на весь экран</small>";
+      btn.addEventListener("click", () => {
+        openHallByIndex(i);
+        closeMenu();
+      });
+      hallMenu.appendChild(btn);
+    });
+
+    function splitTextToParagraphs(text) {
+      const parts = text.split(/\.\s+/).map((s) => s.trim()).filter(Boolean);
+      const grouped = [];
+      for (let i = 0; i < parts.length; i += 2) {
+        const a = parts[i] || "";
+        const b = parts[i + 1] || "";
+        const chunk = (a + (b ? ". " + b : ""));
+        grouped.push(chunk.endsWith(".") ? chunk : chunk + ".");
+      }
+      return grouped.map((p) => "<p>" + p + "</p>").join("");
+    }
+
+    function renderHallContent(hall) {
+      overlayTitle.textContent = hall.title;
+      overlayLead.textContent = hall.lead;
+      overlayGrid.innerHTML = "";
+      hall.cards.forEach((card) => {
+        const item = document.createElement("article");
+        item.className = "overlay-card";
+        item.innerHTML =
+          '<img src="' + card.photo + '" alt="' + card.title + '" loading="lazy">' +
+          '<div class="txt"><h4>' + card.title + "</h4>" + splitTextToParagraphs(card.text) + "</div>";
+        overlayGrid.appendChild(item);
+      });
+    }
+
+    function openHallByIndex(hallIndex) {
+      activeHallIndex = (hallIndex + halls.length) % halls.length;
+      const hall = halls[activeHallIndex];
+      overlayGrid.classList.add("switching");
+      window.setTimeout(() => {
+        renderHallContent(hall);
+        overlayGrid.classList.remove("switching");
+      }, 140);
+      if (!hallOverlay.classList.contains("open")) {
+        hallOverlay.classList.add("open");
+        hallOverlay.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+      }
+    }
+    function closeHall() {
+      hallOverlay.classList.remove("open");
+      hallOverlay.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+    function openMenu() {
+      hallMenu.classList.add("open");
+      hallMenuBackdrop.classList.add("open");
+      hallMenu.setAttribute("aria-hidden", "false");
+    }
+    function closeMenu() {
+      hallMenu.classList.remove("open");
+      hallMenuBackdrop.classList.remove("open");
+      hallMenu.setAttribute("aria-hidden", "true");
+    }
+
+    closeOverlay.addEventListener("click", closeHall);
+    openMenuBtn.addEventListener("click", openMenu);
+    closeMenuBtn.addEventListener("click", closeMenu);
+    hallMenuBackdrop.addEventListener("click", closeMenu);
+    prevHallBtn.addEventListener("click", () => openHallByIndex(activeHallIndex - 1));
+    nextHallBtn.addEventListener("click", () => openHallByIndex(activeHallIndex + 1));
+    toMainBtn.addEventListener("click", () => {
+      closeHall();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    hallOverlay.addEventListener("click", (e) => {
+      if (e.target === hallOverlay) closeHall();
+    });
+
+    timeline.forEach((item) => {
+      const card = document.createElement("article");
+      card.className = "event";
+      card.innerHTML = "<b>" + item.year + "</b><br>" + item.text;
+      timelineGrid.appendChild(card);
+    });
+
+    const mainPhoto = document.getElementById("mainPhoto");
+    const photoCaption = document.getElementById("photoCaption");
+    const photoCounter = document.getElementById("photoCounter");
+    const thumbs = document.getElementById("thumbs");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const viewer = document.getElementById("photoViewer");
+    let index = 0;
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    function renderPhoto(nextIndex) {
+      index = (nextIndex + archivePhotos.length) % archivePhotos.length;
+      mainPhoto.src = archivePhotos[index];
+      mainPhoto.alt = "Архивное фото " + (index + 1);
+      photoCaption.textContent = "Архивные фото из документов и презентаций проекта";
+      photoCounter.textContent = (index + 1) + " / " + archivePhotos.length;
+      document.querySelectorAll(".thumbs img").forEach((img, i) => {
+        img.classList.toggle("active", i === index);
+      });
+    }
+
+    archivePhotos.forEach((src, i) => {
+      const img = document.createElement("img");
+      img.src = src;
+      img.alt = "Миниатюра " + (i + 1);
+      img.loading = "lazy";
+      img.addEventListener("click", () => renderPhoto(i));
+      thumbs.appendChild(img);
+    });
+
+    prevBtn.addEventListener("click", () => renderPhoto(index - 1));
+    nextBtn.addEventListener("click", () => renderPhoto(index + 1));
+
+    if (viewer) {
+      viewer.addEventListener("touchstart", (e) => {
+        touchStartX = e.changedTouches[0].clientX;
+      }, { passive: true });
+      viewer.addEventListener("touchend", (e) => {
+        touchEndX = e.changedTouches[0].clientX;
+        const dx = touchEndX - touchStartX;
+        if (Math.abs(dx) > 40) {
+          if (dx < 0) renderPhoto(index + 1);
+          else renderPhoto(index - 1);
+        }
+      }, { passive: true });
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") { closeHall(); closeMenu(); }
+      if (e.key === "ArrowLeft") renderPhoto(index - 1);
+      if (e.key === "ArrowRight") renderPhoto(index + 1);
+    });
+
+    renderPhoto(0);
+  </script>
+</body>
+</html>
