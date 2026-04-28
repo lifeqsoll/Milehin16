@@ -15,6 +15,14 @@
       --accent: #c4162a;
       --accent-soft: #de4a5f;
     }
+    html.low-perf *,
+    html.low-perf *::before,
+    html.low-perf *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
     * { box-sizing: border-box; }
     body {
       margin: 0;
@@ -356,6 +364,8 @@
       background: var(--paper);
       transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
       transform-origin: center center;
+      content-visibility: auto;
+      contain-intrinsic-size: 520px;
     }
     .overlay-card img {
       width: 100%;
@@ -389,6 +399,12 @@
       }
       .overlay-card:hover .txt {
         background: #fff6ed;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation: none !important;
+        transition: none !important;
       }
     }
     @media (max-width: 980px) {
@@ -760,8 +776,15 @@
     const prevHallBtn = document.getElementById("prevHallBtn");
     const nextHallBtn = document.getElementById("nextHallBtn");
     const toMainBtn = document.getElementById("toMainBtn");
+    const rootEl = document.documentElement;
     let activeHallIndex = 0;
     let isOverlayHeadCollapsed = false;
+    const lowPerfMode = Boolean(
+      (navigator.connection && navigator.connection.saveData) ||
+      (typeof navigator.deviceMemory === "number" && navigator.deviceMemory <= 4) ||
+      (typeof navigator.hardwareConcurrency === "number" && navigator.hardwareConcurrency <= 4)
+    );
+    if (lowPerfMode) rootEl.classList.add("low-perf");
 
     function setOverlayHeadCollapsed(collapsed) {
       if (collapsed === isOverlayHeadCollapsed) return;
@@ -805,6 +828,7 @@
         img.src = card.photo;
         img.alt = card.title;
         img.loading = "lazy";
+        img.decoding = "async";
 
         const txt = document.createElement("div");
         txt.className = "txt";
@@ -904,6 +928,8 @@
     const nextBtn = document.getElementById("nextBtn");
     const viewer = document.getElementById("photoViewer");
     let index = 0;
+    let activeThumbIndex = -1;
+    const thumbNodes = [];
     let touchStartX = 0;
     let touchEndX = 0;
 
@@ -913,19 +939,36 @@
       mainPhoto.alt = "Архивное фото " + (index + 1);
       photoCaption.textContent = "Архивные фото из документов и презентаций проекта";
       photoCounter.textContent = (index + 1) + " / " + archivePhotos.length;
-      document.querySelectorAll(".thumbs img").forEach((img, i) => {
-        img.classList.toggle("active", i === index);
-      });
+      if (thumbNodes[activeThumbIndex]) thumbNodes[activeThumbIndex].classList.remove("active");
+      if (thumbNodes[index]) thumbNodes[index].classList.add("active");
+      activeThumbIndex = index;
     }
 
-    archivePhotos.forEach((src, i) => {
-      const img = document.createElement("img");
-      img.src = src;
-      img.alt = "Миниатюра " + (i + 1);
-      img.loading = "lazy";
-      img.addEventListener("click", () => renderPhoto(i));
-      thumbs.appendChild(img);
-    });
+    function renderThumbBatch(startIndex = 0, batchSize = 12) {
+      const fragment = document.createDocumentFragment();
+      for (let i = startIndex; i < Math.min(startIndex + batchSize, archivePhotos.length); i++) {
+        const img = document.createElement("img");
+        img.src = archivePhotos[i];
+        img.alt = "Миниатюра " + (i + 1);
+        img.loading = "lazy";
+        img.decoding = "async";
+        img.addEventListener("click", () => renderPhoto(i));
+        thumbNodes[i] = img;
+        fragment.appendChild(img);
+      }
+      thumbs.appendChild(fragment);
+
+      const nextIndex = startIndex + batchSize;
+      if (nextIndex < archivePhotos.length) {
+        if ("requestIdleCallback" in window) {
+          window.requestIdleCallback(() => renderThumbBatch(nextIndex, batchSize), { timeout: 120 });
+        } else {
+          window.setTimeout(() => renderThumbBatch(nextIndex, batchSize), 16);
+        }
+      } else {
+        renderPhoto(index);
+      }
+    }
 
     prevBtn.addEventListener("click", () => renderPhoto(index - 1));
     nextBtn.addEventListener("click", () => renderPhoto(index + 1));
@@ -950,6 +993,7 @@
       if (e.key === "ArrowRight") renderPhoto(index + 1);
     });
 
+    renderThumbBatch(0, lowPerfMode ? 8 : 14);
     renderPhoto(0);
 
     // Collapsible gallery functionality
