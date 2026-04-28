@@ -138,21 +138,24 @@
       flex-wrap: wrap;
       color: var(--muted);
     }
-    .thumbs-wrapper { position: relative; margin-top: 11px; }
+    .thumbs-wrapper {
+      position: relative;
+      margin-top: 11px;
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows .45s cubic-bezier(.22, .61, .36, 1);
+    }
+    .thumbs-wrapper.collapsed {
+      grid-template-rows: 0fr;
+    }
     .thumbs {
       display: grid;
       grid-template-columns: repeat(10, minmax(0, 1fr));
       gap: 6px;
       overflow: hidden;
-      position: relative;
-      clip-path: inset(0 0 0 0);
-      transition: clip-path .45s cubic-bezier(.22, .61, .36, 1);
-      will-change: clip-path;
+      min-height: 0;
     }
-    .thumbs.collapsed {
-      clip-path: inset(0 0 calc(100% - 148px) 0);
-    }
-    .thumbs.collapsed::after {
+    .thumbs-wrapper.collapsed::after {
       content: "";
       position: absolute;
       bottom: 0;
@@ -161,12 +164,6 @@
       height: 50px;
       background: linear-gradient(to bottom, transparent, #f6efe6);
       pointer-events: none;
-      opacity: 1;
-      transition: opacity .3s ease .15s;
-    }
-    .thumbs:not(.collapsed)::after {
-      opacity: 0;
-      transition: opacity .2s ease;
     }
     .expand-btn {
       display: block;
@@ -304,7 +301,7 @@
     .overlay-head h3 { margin: 0; font-size: 1.2rem; color: var(--accent); }
     .overlay-head p { margin: 4px 0 0; color: var(--muted); line-height: 1.45; }
 
-    .close-btn, .overlay-nav button {
+    .overlay-nav button {
       border: 1px solid #c7ad99;
       border-radius: 9px;
       background: #f5ece1;
@@ -313,9 +310,8 @@
       cursor: pointer;
       transition: transform .15s ease, border-color .2s ease, background .2s ease;
     }
-    .close-btn { border-radius: 10px; }
-    .close-btn:hover, .overlay-nav button:hover { border-color: var(--accent-soft); background: #efe2d4; }
-    .close-btn:active, .overlay-nav button:active { transform: scale(.97); }
+    .overlay-nav button:hover { border-color: var(--accent-soft); background: #efe2d4; }
+    .overlay-nav button:active { transform: scale(.97); }
     .overlay-nav { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
     .overlay-nav .main-link { border-color: #c7ad99; background: #f5ece1; color: var(--text); }
 
@@ -394,8 +390,7 @@
       .timeline-grid { grid-template-columns: 1fr; }
       .event { padding: 10px; font-size: .96rem; }
       .thumbs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-      .thumbs.collapsed { grid-template-columns: repeat(4, minmax(0, 1fr)); max-height: 140px; overflow: hidden; position: relative; }
-      .thumbs.collapsed::after { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(transparent, #f6efe6); pointer-events: none; }
+      .thumbs-wrapper.collapsed::after { height: 40px; }
       .viewer { height: 50vh; }
       .overlay-inner { padding: 12px 0 14px; }
       .hall-overlay .overlay-grid {
@@ -459,7 +454,6 @@
       .overlay-nav { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
       .overlay-nav button { font-size: .88rem; padding: 10px 8px; }
       .overlay-nav .main-link { display: none; }
-      .close-btn { display: none; }
       .mobile-main-btn {
         display: block !important;
         width: 100%;
@@ -517,10 +511,10 @@
         <span id="photoCaption"></span>
         <span id="photoCounter"></span>
       </div>
-      <div class="thumbs-wrapper">
-        <div class="thumbs collapsed" id="thumbs"></div>
-        <button class="expand-btn" id="expandBtn" type="button">Показать все фотографии</button>
+      <div class="thumbs-wrapper collapsed" id="thumbsWrapper">
+        <div class="thumbs" id="thumbs"></div>
       </div>
+      <button class="expand-btn" id="expandBtn" type="button">Показать все фотографии</button>
     </section>
   </main>
 
@@ -545,7 +539,6 @@
           </div>
           <button class="mobile-main-btn" id="mobileMainBtn" type="button">Главный зал</button>
         </div>
-        <button class="close-btn" id="closeOverlay" type="button">Закрыть зал</button>
       </div>
       <div class="overlay-grid" id="overlayGrid"></div>
     </div>
@@ -707,7 +700,6 @@
     const overlayTitle = document.getElementById("overlayTitle");
     const overlayLead = document.getElementById("overlayLead");
     const overlayGrid = document.getElementById("overlayGrid");
-    const closeOverlay = document.getElementById("closeOverlay");
     const openMenuBtn = document.getElementById("openMenuBtn");
     const closeMenuBtn = document.getElementById("closeMenuBtn");
     const prevHallBtn = document.getElementById("prevHallBtn");
@@ -782,7 +774,6 @@
       hallMenu.setAttribute("aria-hidden", "true");
     }
 
-    closeOverlay.addEventListener("click", closeHall);
     openMenuBtn.addEventListener("click", openMenu);
     closeMenuBtn.addEventListener("click", closeMenu);
     hallMenuBackdrop.addEventListener("click", closeMenu);
@@ -867,16 +858,16 @@
 
     // Collapsible gallery functionality
     const expandBtn = document.getElementById("expandBtn");
-    const thumbsEl = document.getElementById("thumbs");
+    const thumbsWrapper = document.getElementById("thumbsWrapper");
     let isExpanded = false;
 
     expandBtn.addEventListener("click", () => {
       isExpanded = !isExpanded;
       if (isExpanded) {
-        thumbsEl.classList.remove("collapsed");
+        thumbsWrapper.classList.remove("collapsed");
         expandBtn.textContent = "Свернуть";
       } else {
-        thumbsEl.classList.add("collapsed");
+        thumbsWrapper.classList.add("collapsed");
         expandBtn.textContent = "Показать все фотографии";
         // Smooth scroll back to gallery section when collapsing on mobile
         if (window.innerWidth <= 980) {
