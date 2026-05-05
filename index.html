@@ -23,6 +23,26 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes slideUp {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(-12px);
+      }
+    }
     * { box-sizing: border-box; }
     body {
       margin: 0;
@@ -219,7 +239,6 @@
     .thumbs img:hover { transform: translateY(-2px); }
     .thumbs img:active { transform: translateY(0) scale(.96); }
     .thumbs img.active { border-color: var(--accent); }
-    .thumbs img.is-hidden { display: none; }
 
     .hall-menu-backdrop {
       position: fixed;
@@ -337,12 +356,14 @@
       max-height: 220px;
       opacity: 1;
       overflow: hidden;
-      transition: max-height .28s ease, opacity .22s ease, margin .22s ease;
+      transition: max-height .28s cubic-bezier(.22, .61, .36, 1), opacity .25s ease, margin .22s ease;
+      will-change: max-height, opacity;
     }
     .overlay-head.is-collapsed p {
       max-height: 0;
       opacity: 0;
       margin-top: 0;
+      pointer-events: none;
     }
 
     .overlay-nav button {
@@ -423,7 +444,6 @@
         background: #fff6ed;
       }
     }
-    /* Маленькая высота окна на ПК: карточка под экран, текст скроллится внутри */
     @media (min-width: 981px) and (max-height: 900px) {
       .hall-overlay .overlay-grid { grid-template-columns: 1fr; }
       .hall-overlay .overlay-card {
@@ -456,42 +476,21 @@
       .main-content p { font-size: 1rem; line-height: 1.68; }
       .timeline-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .thumbs { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-      .hall-overlay .overlay-grid {
-        display: flex;
-        flex-direction: column;
-        grid-template-columns: none;
-        grid-template-rows: none;
-        gap: 16px;
-        overflow-y: auto;
-      }
-      .hall-overlay .overlay-card {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        overflow: visible;
-      }
-      .hall-overlay .overlay-card img {
-        order: -1;
-        width: 100%;
-        height: auto;
-        max-height: 42vh;
-        object-fit: cover;
-        display: block;
-      }
-      .hall-overlay .overlay-card .txt {
-        display: block;
-        visibility: visible;
-        opacity: 1;
-        min-height: auto;
-        height: auto;
-        font-size: .98rem;
+      .overlay-grid { grid-template-columns: 1fr; }
+      .overlay-card { display: flex; flex-direction: column; }
+      .overlay-card img { order: -1; width: 100%; height: auto; max-height: 50vh; object-fit: cover; }
+      .overlay-card .txt { 
+        min-height: auto; 
+        font-size: 1rem; 
         order: 1;
-        position: relative;
-        z-index: 2;
-        background: var(--paper);
-        border-top: 1px solid #d5beaa;
-        padding: 12px;
+        max-height: 60vh;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-gutter: stable;
       }
+      .overlay-card .txt h4 { font-size: 1.05rem; }
+      .overlay-card .txt p { font-size: 1rem; line-height: 1.6; }
     }
     @media (max-width: 640px) {
       .wrap { width: min(1220px, 96vw); padding: 14px 0 22px; }
@@ -534,6 +533,7 @@
         max-height: 55vh !important;
         min-height: 220px !important;
         object-fit: cover !important;
+        object-position: top !important;
         display: block !important;
         order: -1 !important;
       }
@@ -708,53 +708,48 @@
   </div>
 
   <script>
-    const archivePhotosAll = [
+    const archivePhotos = [
       "assets/hall-photos/hall-001.jpeg", "assets/hall-photos/hall-003.jpeg", "assets/hall-photos/hall-005.jpeg",
       "assets/hall-photos/hall-007.jpeg", "assets/hall-photos/hall-009.jpeg", "assets/hall-photos/hall-011.jpeg",
-      "assets/hall-photos/hall-012.jpeg", "assets/hall-photos/hall-013.jpeg", "assets/hall-photos/hall-015.jpeg",
-      "assets/hall-photos/hall-017.jpeg", "assets/hall-photos/hall-019.jpeg", "assets/hall-photos/hall-021.png",
-      "assets/hall-photos/hall-023.jpeg", "assets/hall-photos/hall-025.jpeg", "assets/hall-photos/hall-027.jpeg",
-      "assets/hall-photos/hall-029.jpeg", "assets/hall-photos/hall-030.jpeg", "assets/hall-photos/hall-032.jpeg",
-      "assets/hall-photos/hall-034.png", "assets/hall-photos/hall-036.jpeg", "assets/hall-photos/hall-038.jpeg",
-      "assets/hall-photos/hall-039.png", "assets/hall-photos/hall-041.jpeg", "assets/hall-photos/hall-043.jpeg",
-      "assets/hall-photos/hall-046.jpeg", "assets/hall-photos/hall-047.jpeg", "assets/hall-photos/hall-048.jpeg",
-      "assets/hall-photos/hall-049.jpeg", "assets/hall-photos/hall-050.jpeg", "assets/hall-photos/hall-053.jpeg",
+      "assets/hall-photos/hall-012.jpeg", "assets/hall-photos/hall-013.jpeg", "assets/hall-photos/hall-017.jpeg",
+      "assets/hall-photos/hall-019.jpeg", "assets/hall-photos/hall-021.png", "assets/hall-photos/hall-023.jpeg",
+      "assets/hall-photos/hall-025.jpeg", "assets/hall-photos/hall-027.jpeg", "assets/hall-photos/hall-029.jpeg",
+      "assets/hall-photos/hall-030.jpeg", "assets/hall-photos/hall-034.png", "assets/hall-photos/hall-036.jpeg",
+      "assets/hall-photos/hall-038.jpeg", "assets/hall-photos/hall-039.png", "assets/hall-photos/hall-041.jpeg",
+      "assets/hall-photos/hall-043.jpeg", "assets/hall-photos/hall-046.jpeg", "assets/hall-photos/hall-047.jpeg",
+      "assets/hall-photos/hall-048.jpeg", "assets/hall-photos/hall-049.jpeg", "assets/hall-photos/hall-053.jpeg",
       "assets/hall-photos/hall-055.png", "assets/hall-photos/hall-057.png", "assets/hall-photos/hall-059.png",
       "assets/hall-photos/hall-065.jpeg", "assets/hall-photos/hall-067.png", "assets/hall-photos/hall-069.jpeg",
       "assets/hall-photos/hall-071.png", "assets/hall-photos/hall-073.png", "assets/hall-photos/hall-075.png",
-      "assets/hall-photos/hall-077.png", "assets/hall-photos/hall-080.jpeg", "assets/hall-photos/hall-082.jpeg",
-      "assets/hall-photos/hall-084.png", "assets/hall-photos/hall-086.png", "assets/hall-photos/hall-088.png",
-      "assets/hall-photos/hall-090.jpeg", "assets/hall-photos/hall-092.png", "assets/hall-photos/hall-095.png",
-      "assets/hall-photos/hall-097.png", "assets/hall-photos/hall-098.png", "assets/hall-photos/hall-099.png",
-      "assets/hall-photos/hall-102.png", "assets/hall-photos/hall-104.png", "assets/hall-photos/hall-106.jpeg",
-      "assets/hall-photos/hall-107.png", "assets/hall-photos/hall-108.jpeg", "assets/hall-photos/hall-109.jpeg",
-      "assets/hall-photos/hall-110.jpeg", "assets/hall-photos/hall-112.png", "assets/hall-photos/hall-114.png",
+      "assets/hall-photos/hall-077.png", "assets/hall-photos/hall-082.jpeg", "assets/hall-photos/hall-084.png",
+      "assets/hall-photos/hall-086.png", "assets/hall-photos/hall-088.png", "assets/hall-photos/hall-090.jpeg",
+      "assets/hall-photos/hall-092.png", "assets/hall-photos/hall-095.png", "assets/hall-photos/hall-097.png",
+      "assets/hall-photos/hall-098.png", "assets/hall-photos/hall-099.png", "assets/hall-photos/hall-102.png",
+      "assets/hall-photos/hall-104.png", "assets/hall-photos/hall-106.jpeg", "assets/hall-photos/hall-107.png",
+      "assets/hall-photos/hall-108.jpeg", "assets/hall-photos/hall-110.jpeg", "assets/hall-photos/hall-114.png",
       "assets/hall-photos/hall-116.png", "assets/hall-photos/hall-118.jpeg", "assets/hall-photos/hall-119.png",
-      "assets/hall-photos/hall-user-01.webp", "assets/hall-photos/hall-user-02.jpg", "assets/hall-photos/hall-user-03.jpg",
-      "assets/hall-photos/hall-user-04.jpg", "assets/hall-photos/hall-user-05.png", "assets/hall-photos/hall-user-06.jpg"
+      "assets/hall-photos/hall-user-01.webp", "assets/hall-photos/hall-user-04.jpg", "assets/hall-photos/hall-user-05.png",
+      "assets/hall-photos/hall-user-06.jpg"
     ];
-    // Удаляем из фотоархива конкретные позиции (как в счётчике 1..N)
-    const removedArchivePositions = new Set([9, 16, 24, 28, 41, 45, 52, 53]);
-    const archivePhotos = archivePhotosAll.filter((_, i) => !removedArchivePositions.has(i + 1));
 
     const halls = [
       {
         id: "childhood",
-        title: "Зал детства",
+        title: "Детство И. Ф. Милёхина",
         lead: "Семья, учеба, первые профессии и довоенное становление Ивана Федоровича. Родился 21 февраля 1917 года в деревне Алпеево Орловской области; до войны работал в хозяйстве, на производстве и в комсомольских структурах. В этот период сформировались его дисциплина, организаторские качества и ответственность, которые позже помогли на фронте и в общественной работе.",
         cards: [
           {
-            photo: "assets/hall-photos/hall-user-05.png",
+            photo: "assets/hall-photos/hall-116.png",
             title: "Родина и семья",
             text: "Иван Федорович Милёхин родился 21 февраля 1917 года в деревне Алпеево Орловской области. Детство проходило в крестьянской среде, где труд и взаимопомощь были нормой. В юности он рано включился в общественную жизнь и привык к ответственности за общее дело. Уже в молодом возрасте ему доверяли организационные задачи, что помогло сформировать уверенный, собранный характер и уважение к коллективной дисциплине."
           },
           {
-            photo: "assets/hall-photos/hall-030.jpeg",
+            photo: "assets/hall-photos/hall-086.png",
             title: "Учеба и первые годы работы",
             text: "После окончания школы крестьянской молодежи он получил практический опыт в разных сферах: на производстве, в учетной и организационной деятельности. Этот период выработал точность, аккуратность и ответственное отношение к каждому порученному делу. В дальнейшем именно эти качества помогли ему быстро принимать решения и держать высокий уровень личной дисциплины в условиях военной службы. По документам проекта, этот опыт стал фундаментом его будущей командирской работы в боевых условиях."
           },
           {
-            photo: "assets/hall-photos/hall-050.jpeg",
+            photo: "assets/hall-photos/hall-user-05.png",
             title: "Комсомольская работа до войны",
             text: "В предвоенные годы Милёхин занимался общественной и комсомольской работой: участвовал в просветительских мероприятиях, работал с молодежью и коллективами. Этот опыт стал его первой школой руководства, умения принимать решения и нести личную ответственность. Уже до войны он сформировал привычку работать с людьми и вести коллектив к общей цели, что позже стало важным в армейской службе. Поэтому в сложных ситуациях он умел сохранять порядок в подразделении и поддерживать моральный настрой личного состава."
           }
@@ -762,21 +757,21 @@
       },
       {
         id: "war",
-        title: "Зал войны",
+        title: "Военное время",
         lead: "Фронтовой путь, ранения, освобождение территорий и воинский долг. За годы войны Иван Федорович был неоднократно ранен, но возвращался в строй и продолжал командную службу. Участвовал в операциях на калужском направлении, в том числе при освобождении Воротынска, и прошел большой боевой путь в составе действующей армии.",
         cards: [
           {
-            photo: "assets/hall-photos/hall-user-02.jpg",
+            photo: "assets/hall-photos/hall-065.jpeg",
             title: "Начало Великой Отечественной войны",
             text: "С первых месяцев войны Иван Федорович оказался в тяжелой боевой обстановке. После выхода из окружения он продолжил службу в действующей армии. Эти качества позволили ему сохранить самообладание и руководить людьми в критических условиях. Свидетельства в источниках подчеркивают его собранность, выносливость и умение действовать без паники даже под сильным давлением."
           },
           {
-            photo: "assets/hall-photos/hall-user-04.jpg",
+            photo: "assets/hall-photos/hall-032.jpeg",
             title: "Бои за Воротынск и Калужскую землю",
             text: "В декабре 1941 года Милёхин участвовал в освобождении станции Воротынск и населенных пунктов калужского направления. Успешное выполнение боевых задач на этом участке стало важной частью его фронтовой биографии и было отмечено наградой. В источниках проекта этот эпизод рассматривается как один из ключевых в его военном пути и в истории освобождения калужского направления. Успех этой операции имел значение не только для локального участка фронта, но и для дальнейшего продвижения советских войск."
           },
           {
-            photo: "assets/hall-photos/hall-046.jpeg",
+            photo: "assets/hall-photos/hall-069.jpeg",
             title: "Боевой итог",
             text: "В составе 50-й армии Иван Федорович участвовал в освобождении десятков городов и множества населенных пунктов. Он был неоднократно ранен, но возвращался в строй. Его военный путь стал примером личного мужества и верности службе. В разных периодах войны он демонстрировал не только личную стойкость, но и ответственное отношение к бойцам, что особенно ценилось в командирской практике того времени. По воспоминаниям сослуживцев, он всегда уделял внимание не только выполнению задачи, но и сохранению людей в бою."
           }
@@ -784,7 +779,7 @@
       },
       {
         id: "awards",
-        title: "Зал наград",
+        title: "Награды",
         lead: "Боевые награды как подтверждение личного подвига и командирской работы. В биографии отмечаются орден Красной Звезды, орден Красного Знамени и другие награды за мужество и командирские решения. Награды отражают не единичный подвиг, а многолетнюю фронтовую службу и ответственность за личный состав.",
         cards: [
           {
@@ -798,7 +793,7 @@
             text: "По документам и материалам проекта Милёхин награждался за мужество, выдержку и эффективное руководство подразделениями. Наградной путь показывает системный вклад в дело Победы, а не единичный боевой эпизод. Биографические материалы демонстрируют, что его заслуги фиксировались последовательно, на разных этапах фронтовой службы. За каждой наградой стоит конкретная боевая работа, командирская ответственность и длительная служба в сложнейших условиях фронта."
           },
           {
-            photo: "assets/hall-photos/hall-005.jpeg",
+            photo: "assets/hall-photos/hall-036.jpeg",
             title: "Награды в музейной работе",
             text: "Копии наградных документов, фотографии и биографические материалы используются в школьном музее и на уроках мужества. Это позволяет ученикам видеть историю в конкретных фактах и лучше понимать цену воинского долга. Через такие материалы школьники знакомятся с реальными биографиями участников войны и воспринимают историю как личный опыт своего города и своей школы. Это делает музейную и проектную работу не формальной, а действительно воспитательной и ценностно значимой."
           }
@@ -806,7 +801,7 @@
       },
       {
         id: "post1",
-        title: "Зал Поста №1",
+        title: "Пост 1",
         lead: "Традиция Почетной Вахты Памяти в Калуге и вклад Ивана Федоровича Милёхина. С 1975 года Пост №1 у Вечного огня стал одной из ключевых патриотических традиций города. Иван Федорович как первый руководитель штаба заложил ритуал, дисциплину караула и преемственность поколений.",
         cards: [
           {
@@ -815,12 +810,12 @@
             text: "6 мая 1975 года в Калуге была открыта Почетная Вахта памяти у Вечного огня. Иван Федорович Милёхин стал первым начальником городского штаба Поста №1 и сформировал организационную систему, сохранявшуюся много лет. Под его руководством были выстроены методика подготовки, церемониальный порядок и практические требования к несению службы, благодаря чему традиция получила устойчивую основу. Он разработал понятную структуру подготовки караула, порядок смен и требования к дисциплине, благодаря чему Пост №1 стал устойчивой городской традицией."
           },
           {
-            photo: "assets/hall-photos/hall-073.png",
+            photo: "assets/hall-photos/hall-user-02.jpg",
             title: "Ритуал и «милёхинский шаг»",
             text: "При Милёхине сложился особый церемониальный порядок несения службы, включая известный «милёхинский шаг». Этот ритуал объединяет торжественность, четкость действий и уважение к памяти погибших защитников Отечества. Он был задуман как воспитательный инструмент: через форму, шаг и дисциплину подростки осмысляли значение подвига предыдущих поколений. Для школьников участие в церемонии стало важным опытом личной ответственности и понимания связи поколений."
           },
           {
-            photo: "assets/hall-photos/hall-075.png",
+            photo: "assets/hall-photos/hall-119.png",
             title: "Значение для города",
             text: "Пост №1 стал одним из символов патриотической культуры Калуги. Для многих участников караула это становилось первым серьезным опытом гражданской ответственности и личного отношения к истории страны. Через караул прошли тысячи подростков, для которых служба на Посту стала школой дисциплины, гражданской ответственности и уважения к истории своей страны. Традиция сохраняется десятилетиями и поддерживается школами, педагогами и ветеранским сообществом города."
           }
@@ -828,23 +823,89 @@
       },
       {
         id: "legacy",
-        title: "Зал памяти и наследия",
+        title: "Память и наследие",
         lead: "Сохранение памяти о Милёхине в школе, музее и городских мероприятиях. Школа №16 носит его имя, действует мини-музей и регулярно проходят встречи памяти с участием семьи героя. Память о нем поддерживается не только датами, но и постоянной образовательной работой с учениками.",
         cards: [
           {
-            photo: "assets/hall-photos/hall-user-03.jpg",
+            photo: "assets/hall-photos/hall-080.jpeg",
             title: "Школа имени И. Ф. Милёхина",
             text: "Школа №16 в Калуге носит имя Ивана Федоровича Милёхина. В образовательной и воспитательной работе школы его биография используется как пример гражданской зрелости, служения Родине и ответственности перед обществом. На этой основе строятся тематические занятия, проектные конкурсы и встречи, направленные на формирование исторической памяти учащихся. На уроках мужества и тематических встречах ученики знакомятся с документами, фотографиями и воспоминаниями, связанными с его жизненным путем."
           },
           {
-            photo: "assets/hall-photos/hall-084.png",
+            photo: "assets/hall-photos/hall-073.png",
             title: "Мини-музей и памятник",
             text: "В школе действует мини-музей с документами, фотографиями и проектными материалами. На территории установлен памятник, где проходят памятные церемонии и встречи. Это делает историческую память частью повседневной школьной жизни. Музейная экспозиция помогает связать архивные документы с современным образовательным процессом и показывает, как личная история героя влияет на жизнь школы сегодня. Экспозиция музея регулярно используется на классных часах, а материалы пополняются благодаря проектной работе учеников и педагогов."
           },
           {
-            photo: "assets/hall-photos/hall-086.png",
+            photo: "assets/hall-photos/hall-user-03.jpg",
             title: "Связь поколений",
             text: "В памятных школьных и городских мероприятиях участвуют родственники Ивана Федоровича, включая его дочь. Такая личная связь поколений делает историю живой и близкой для учеников, помогает сохранять искреннюю память. Формат живого диалога с семьей героя усиливает эмоциональное восприятие материала и мотивирует школьников глубже изучать историю родного края. Благодаря этому память о Милёхине воспринимается не формально, а как часть реальной семейной и городской истории."
+          }
+        ]
+      },
+      {
+        id: "command",
+        title: "Командирская служба",
+        lead: "Командирская ответственность Ивана Федоровича в боевых условиях: управление людьми, принятие решений под огнем и забота о личном составе. Материалы этого зала подчеркивают не только его личное мужество, но и способность сохранять порядок в подразделении в наиболее сложные моменты фронтовой обстановки.",
+        cards: [
+          {
+            photo: "assets/hall-photos/hall-019.jpeg",
+            title: "Ответственность командира",
+            text: "Во фронтовых условиях Милёхин отвечал не только за выполнение задачи, но и за сохранение боеспособности подразделения. Командирская служба требовала точных решений, дисциплины и постоянного контроля ситуации. По архивным материалам видно, что он умел совмещать требовательность и личную заботу о бойцах, что особенно важно в напряженной обстановке боев."
+          },
+          {
+            photo: "assets/hall-photos/hall-023.jpeg",
+            title: "Решения в критической обстановке",
+            text: "В период тяжелых боев Иван Федорович проявлял выдержку и способность быстро оценивать обстановку. Подобные качества помогали подразделению действовать организованно даже при сильном давлении противника. Воспоминания и документальные источники указывают, что именно спокойствие и четкость приказов становились опорой для личного состава в самые сложные минуты."
+          },
+          {
+            photo: "assets/hall-photos/hall-025.jpeg",
+            title: "Лидерство и воинский долг",
+            text: "Командирская работа Милёхина строилась на личном примере, уважении к бойцам и строгом исполнении воинского долга. Такой стиль руководства помогал поддерживать моральный настрой и боевую устойчивость подразделений. Этот опыт стал важной частью его биографии и одной из причин, по которым его фронтовой путь рассматривается как образец ответственной службы."
+          }
+        ]
+      },
+      {
+        id: "city-service",
+        title: "Служение городу",
+        lead: "Послевоенные годы Ивана Федоровича в Калуге: общественная работа, участие в патриотическом воспитании и формирование городских традиций памяти. Здесь раскрывается его вклад в мирную жизнь города и работу с молодежью.",
+        cards: [
+          {
+            photo: "assets/hall-photos/hall-071.png",
+            title: "Возвращение к мирной жизни",
+            text: "После войны Милёхин продолжил служение обществу уже в гражданской сфере. Его фронтовой опыт стал основой для общественной деятельности, направленной на укрепление памяти о защитниках Отечества. Он активно участвовал в мероприятиях, где личный пример ветерана помогал молодежи лучше понимать цену Победы."
+          },
+          {
+            photo: "assets/hall-photos/hall-017.jpeg",
+            title: "Патриотическое воспитание молодежи",
+            text: "Одним из ключевых направлений его работы стала передача исторической памяти школьникам и молодым жителям города. Через встречи, беседы и участие в памятных акциях он формировал уважительное отношение к прошлому страны. Такая деятельность помогала связывать историю семьи, школы и города в единое воспитательное пространство."
+          },
+          {
+            photo: "assets/hall-photos/hall-067.png",
+            title: "Городские традиции памяти",
+            text: "Участие Ивана Федоровича в общественной жизни Калуги способствовало укреплению устойчивых традиций памяти о войне. Эти традиции включают церемонии, школьные проекты и совместную работу педагогов, ветеранов и семей фронтовиков. Благодаря этому память о событиях и героях войны сохраняется как живая часть городской культуры."
+          }
+        ]
+      },
+      {
+        id: "family-memory",
+        title: "Семейная память",
+        lead: "Личная и семейная линия памяти о Милёхине: участие родственников в школьных и городских мероприятиях, сохранение документов и передача биографии новым поколениям. Этот зал показывает, как семейная история поддерживает общественную память.",
+        cards: [
+          {
+            photo: "assets/hall-photos/hall-110.jpeg",
+            title: "Семейный архив",
+            text: "Семейные материалы, фотографии и документы помогают восстановить важные детали биографии Ивана Федоровича. Для школьного музея и проектной работы это ценный источник, позволяющий показать историю через реальные свидетельства. Благодаря архиву учащиеся видят, что за официальными датами стоят судьбы конкретных людей и их семей."
+          },
+          {
+            photo: "assets/hall-photos/hall-108.jpeg",
+            title: "Встречи с родственниками",
+            text: "Участие семьи героя в памятных мероприятиях делает работу по сохранению памяти более личной и содержательной. Живое общение с родственниками помогает школьникам глубже воспринимать исторический материал и задавать важные вопросы о времени, войне и человеческом выборе. Такой формат усиливает связь между поколениями и формирует осознанное отношение к истории."
+          },
+          {
+            photo: "assets/hall-photos/hall-109.jpeg",
+            title: "Преемственность поколений",
+            text: "Семейная память о Милёхине поддерживает преемственность между прошлым и настоящим. Через совместные мероприятия школы, музея и семьи формируется устойчивое уважение к подвигу фронтовиков и к труду людей послевоенного времени. Именно такая преемственность делает историческую память не формальной, а по-настоящему живой и значимой для молодежи."
           }
         ]
       }
@@ -943,22 +1004,15 @@
 
         const txt = document.createElement("div");
         txt.className = "txt";
-        txt.style.display = "block";
-        txt.style.visibility = "visible";
-        txt.style.opacity = "1";
 
         const title = document.createElement("h4");
         title.textContent = card.title;
-        title.style.display = "block";
         txt.appendChild(title);
 
         const paragraphs = splitTextToParagraphs(card.text);
         (paragraphs.length ? paragraphs : [String(card.text || "")]).forEach((line) => {
           const p = document.createElement("p");
           p.textContent = line;
-          p.style.display = "block";
-          p.style.visibility = "visible";
-          p.style.opacity = "1";
           txt.appendChild(p);
         });
 
