@@ -326,6 +326,8 @@
       display: grid;
       grid-template-rows: auto 1fr;
       gap: 12px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
       transform: scale(.985);
       transition: transform .34s ease;
     }
@@ -386,13 +388,14 @@
     .overlay-nav .main-link { border-color: #c7ad99; background: #f5ece1; color: var(--text); }
 
     .overlay-grid {
-      overflow: auto;
+      overflow: visible;
       border: 1px solid #dbc7b5;
       border-radius: 14px;
       padding: 12px;
       background: #f6efe6;
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: start;
       gap: 10px;
       opacity: 1;
       transform: translateY(0);
@@ -407,22 +410,32 @@
       transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
       transform-origin: center center;
       content-visibility: auto;
-      contain-intrinsic-size: 520px;
+      contain-intrinsic-size: 700px;
+      display: flex;
+      flex-direction: column;
+      max-height: min(78vh, 740px);
     }
     .overlay-card img {
       width: 100%;
-      height: 240px;
+      height: 340px;
       object-fit: cover;
+      object-position: top;
       display: block;
       background: #e4d8cc;
       cursor: zoom-in;
+      flex-shrink: 0;
     }
     .overlay-card .txt {
       padding: 12px;
       line-height: 1.62;
       color: var(--text);
       font-size: 1rem;
-      min-height: 240px;
+      flex: 1;
+      min-height: 80px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-gutter: stable;
       background: var(--paper);
       border-top: 1px solid #d5beaa;
       transition: background .2s ease;
@@ -432,7 +445,7 @@
     .overlay-card h4 { margin: 0 0 8px; font-size: 1.03rem; color: #a1172a; }
 
 
-    @media (hover: hover) and (min-width: 981px) {
+    @media (hover: hover) and (min-width: 769px) {
       .overlay-card:hover {
         transform: scale(1.015);
         border-color: var(--accent);
@@ -444,25 +457,16 @@
         background: #fff6ed;
       }
     }
-    @media (min-width: 981px) and (max-height: 900px) {
-      .hall-overlay .overlay-grid { grid-template-columns: 1fr; }
+    @media (min-width: 769px) and (max-height: 800px) {
       .hall-overlay .overlay-card {
-        display: grid;
-        grid-template-rows: auto 1fr;
-        height: min(74vh, 620px);
-      }
-      .hall-overlay .overlay-card img {
-        height: auto;
-        max-height: clamp(180px, 34vh, 340px);
-        width: 100%;
-        object-fit: cover;
+        max-height: none;
       }
       .hall-overlay .overlay-card .txt {
-        min-height: 120px;
-        overflow: auto;
-        overscroll-behavior: contain;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-gutter: stable;
+        max-height: none;
+        overflow-y: visible;
+      }
+      .hall-overlay .overlay-card img {
+        height: 200px;
       }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -471,28 +475,13 @@
         transition: none !important;
       }
     }
-    @media (max-width: 980px) {
+    @media (max-width: 1200px) {
       .main-hall { min-height: 62vh; }
       .main-content p { font-size: 1rem; line-height: 1.68; }
       .timeline-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .thumbs { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-      .overlay-grid { grid-template-columns: 1fr; }
-      .overlay-card { display: flex; flex-direction: column; }
-      .overlay-card img { order: -1; width: 100%; height: auto; max-height: 50vh; object-fit: cover; }
-      .overlay-card .txt { 
-        min-height: auto; 
-        font-size: 1rem; 
-        order: 1;
-        max-height: 60vh;
-        overflow-y: auto;
-        overscroll-behavior: contain;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-gutter: stable;
-      }
-      .overlay-card .txt h4 { font-size: 1.05rem; }
-      .overlay-card .txt p { font-size: 1rem; line-height: 1.6; }
     }
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
       .wrap { width: min(1220px, 96vw); padding: 14px 0 22px; }
       .open-menu-btn { padding: 9px 12px; font-size: .95rem; }
       .main-content h1 { font-size: 1.45rem; line-height: 1.3; }
@@ -501,6 +490,8 @@
       .timeline-grid { grid-template-columns: 1fr; }
       .event { padding: 10px; font-size: .96rem; }
       .thumbs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .overlay-card { max-height: none !important; }
+      .overlay-card .txt { max-height: none !important; overflow-y: visible !important; }
       .thumbs-wrapper { max-height: 320px; }
       .thumbs-wrapper.collapsed { max-height: 150px; }
       .thumbs-wrapper.collapsed::after { height: 40px; }
@@ -526,11 +517,12 @@
         border-radius: 12px;
         overflow: hidden;
         flex-shrink: 0;
+        max-height: none !important;
       }
       .hall-overlay .overlay-card img {
         width: 100% !important;
         height: auto !important;
-        max-height: 55vh !important;
+        max-height: 65vh !important;
         min-height: 220px !important;
         object-fit: cover !important;
         object-position: top !important;
@@ -543,6 +535,8 @@
         width: 100% !important;
         min-height: auto !important;
         height: auto !important;
+        max-height: none !important;
+        overflow-y: visible !important;
         font-size: 1.05rem !important;
         line-height: 1.75 !important;
         padding: 16px !important;
@@ -587,7 +581,7 @@
       .mobile-main-btn:hover { filter: brightness(1.08); }
       .mobile-main-btn:active { transform: scale(.97); }
     }
-    @media (min-width: 641px) {
+    @media (min-width: 769px) {
       .mobile-main-btn { display: none !important; }
     }
     .photo-lightbox {
@@ -739,7 +733,7 @@
         lead: "Семья, учеба, первые профессии и довоенное становление Ивана Федоровича. Родился 21 февраля 1917 года в деревне Алпеево Орловской области; до войны работал в хозяйстве, на производстве и в комсомольских структурах. В этот период сформировались его дисциплина, организаторские качества и ответственность, которые позже помогли на фронте и в общественной работе.",
         cards: [
           {
-            photo: "assets/hall-photos/hall-116.png",
+            photo: "assets/hall-photos/family-photo.jpg",
             title: "Родина и семья",
             text: "Иван Федорович Милёхин родился 21 февраля 1917 года в деревне Алпеево Орловской области. Детство проходило в крестьянской среде, где труд и взаимопомощь были нормой. В юности он рано включился в общественную жизнь и привык к ответственности за общее дело. Уже в молодом возрасте ему доверяли организационные задачи, что помогло сформировать уверенный, собранный характер и уважение к коллективной дисциплине."
           },
@@ -1015,6 +1009,8 @@
           p.textContent = line;
           txt.appendChild(p);
         });
+        const lastP = txt.querySelector("p:last-of-type");
+        if (lastP) lastP.style.marginBottom = "4px";
 
         item.appendChild(img);
         item.appendChild(txt);
@@ -1162,6 +1158,11 @@
         return;
       }
       if (e.key === "Escape") { closeHall(); closeMenu(); }
+      if (hallOverlay.classList.contains("open")) {
+        if (e.key === "ArrowLeft") { openHallByIndex(activeHallIndex - 1); return; }
+        if (e.key === "ArrowRight") { openHallByIndex(activeHallIndex + 1); return; }
+        return;
+      }
       if (e.key === "ArrowLeft") renderPhoto(index - 1);
       if (e.key === "ArrowRight") renderPhoto(index + 1);
     });
